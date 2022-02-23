@@ -1,6 +1,7 @@
 import json
 
 import streamlit as st
+from streamlit_option_menu import option_menu
 
 import os
 from google.cloud import dialogflow
@@ -104,74 +105,84 @@ def create_intent(project_id, display_name, training_phrases_parts, message_text
 
 
 
+
+
 st.title("SPooN's SDK")
 
-if st.button('Delete the scenario'):
-    delete_all_intents(project_id)
+selected = []
+with st.sidebar:
+    selected = option_menu("Skills", ["MCQ", 'Say'],
+        icons=['bricks', 'bricks'], menu_icon="robot", default_index=0)
 
-st.header("MCQ")
-question = st.text_input("Question")
-visual_answers = st.checkbox("Visual Answers", True)
+    if st.button('Delete the scenario'):
+        delete_all_intents(project_id)
 
-number_of_choices = st.slider("number of choices", 1,6,1)
+if selected == "MCQ":
+    st.header("MCQ")
+    question = st.text_input("Question")
+    visual_answers = st.checkbox("Visual Answers", True)
 
-cols = st.columns(number_of_choices)
-choices = []
-for i, col in enumerate(cols):
-    choices.append(
-        {
-            "displayText": col.text_input("display text", key="mcq_display_text_" + str(i)),
-            "content": col.text_input("content", key="mc_content_" + str(i)),
-            "imageUrl": col.text_input("image_url", key="mcq_image_url_" + str(i))
-        }
-    )
+    number_of_choices = st.slider("number of choices", 1,6,1)
 
-if st.button("Create MCQ"):
-    mcq = {
-        "spoon":
+    cols = st.columns(number_of_choices)
+    choices = []
+    for i, col in enumerate(cols):
+        choices.append(
             {
-                "id": "MCQ",
-                "question": question,
-                "answers": [
-                    {
-                        "displayText": choice["displayText"],
-                        "content": choice["content"],
-                        "imageUrl": choice["imageUrl"]
-                    }
-
-                    for choice in choices
-                ]
+                "displayText": col.text_input("display text", key="mcq_display_text_" + str(i)),
+                "content": col.text_input("content", key="mc_content_" + str(i)),
+                "imageUrl": col.text_input("image_url", key="mcq_image_url_" + str(i))
             }
+        )
+
+    if st.button("Create MCQ"):
+        mcq = {
+            "spoon":
+                {
+                    "id": "MCQ",
+                    "question": question,
+                    "answers": [
+                        {
+                            "displayText": choice["displayText"],
+                            "content": choice["content"],
+                            "imageUrl": choice["imageUrl"]
+                        }
+
+                        for choice in choices
+                    ]
+                }
+        }
+        parent_intent = create_intent(project_id, question, [question], payloads=mcq)
+
+        for choice in choices:
+            create_intent(project_id, choice["displayText"], [choice["displayText"]], [choice["content"]],
+                          parent_intent=parent_intent)
+
+
+
+if selected == "Say":
+    st.header("Say")
+    tts = st.text_input("text to say")
+    expression_type = st.selectbox("Expression type",
+                                   ["Standard", "Happy", "Sad", "Surprised", "Scared", "Curious", "Proud", "Mocker", "Crazy"])
+    expression_intensity = st.slider("Expression Intensity", 0., 1., 0.7, 0.1)
+    expression_gaze_mode = st.radio("Expression Gaze mode",
+                                    ["Focused", "Distracted"])
+    bang = st.checkbox("Bang")
+    json_say = {
+      "spoon" :
+      {
+        "id": "Say",
+        "text": tts,
+        "expression":
+        {
+          "type": expression_type,
+          "intensity": expression_intensity,
+          "gazeMode": expression_gaze_mode
+        },
+        "bang": bang
+      }
     }
-    parent_intent = create_intent(project_id, question, [question], payloads=mcq)
-
-    for choice in choices:
-        create_intent(project_id, choice["displayText"], [choice["displayText"]], [choice["content"]],
-                      parent_intent=parent_intent)
-
-
-st.header("Generating JSON for TTSa")
-tts = st.text_input("text to say")
-expression_type = st.selectbox("Expression type",
-                               ["Standard", "Happy", "Sad", "Surprised", "Scared", "Curious", "Proud", "Mocker", "Crazy"])
-expression_intensity = st.slider("Expression Intensity", 0., 1., 0.7, 0.1)
-expression_gaze_mode = st.radio("Expression Gaze mode",
-                                ["Focused", "Distracted"])
-bang = st.checkbox("Bang")
-json_say = {
-  "spoon" :
-  {
-    "id": "Say",
-    "text": tts,
-    "expression":
-    {
-      "type": expression_type,
-      "intensity": expression_intensity,
-      "gazeMode": expression_gaze_mode
-    },
-    "bang": bang
-  }
-}
-if st.button("Generate JSON"):
-    generated_json = json.dumps(json_say, indent = 2)
-    st.text_area("JSON", value=generated_json, height=400)
+    if st.button("Generate JSON"):
+        generated_json = json.dumps(json_say, indent = 2)
+        st.text_area("JSON", value=generated_json, height=400)
