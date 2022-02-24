@@ -1,0 +1,6 @@
+{
+  "id": "EndScenario",
+  "status": ["Succeeded", "Failed", "CancelledByUser", "Error"],
+  "afterEndType": ["Passive", "Active"],
+  "message": ""
+}

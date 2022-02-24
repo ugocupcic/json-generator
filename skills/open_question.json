@@ -1,0 +1,6 @@
+{
+  "id": "OpenQuestion",
+  "questionId": "str",
+  "question": "str",
+  "keyboardType": "str"
+}

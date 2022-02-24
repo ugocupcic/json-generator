@@ -1,0 +1,10 @@
+{
+    "id": "Say",
+    "text": "str",
+    "bang": "bool",
+    "expression": {
+      "type": ["Standard", "Happy", "Sad", "Surprised", "Scared", "Curious", "Proud", "Mocker", "Crazy"],
+      "intensity": [0.0, 1.0, 0.1, 0.7],
+      "gazeMode": ["Focused", "Distracted"]
+    }
+}

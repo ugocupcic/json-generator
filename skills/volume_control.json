@@ -1,0 +1,5 @@
+{
+  "id": "VolumeControl",
+  "setVolume": "float",
+  "changeVolume": "float"
+}

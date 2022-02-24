@@ -1,0 +1,7 @@
+ {
+  "id": "ExpressiveState",
+  "mood":
+  {
+    "type": ["Standard", "Happy", "Sad", "Grumpy"]
+  }
+}

@@ -1,0 +1,8 @@
+
+{
+  "id": "DisplayImage",
+  "imagePath": "str",
+  "caption": "str",
+  "duration": "float",
+  "clearImage": "bool"
+}
